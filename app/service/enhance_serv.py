@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from app.model.enhancement_game import enhancement_game
 from app.model.enhancement_guiness import enhancement_guiness
 from app.model.enhancement_history import enhancement_history
-from app import db, app
+from app.api import db, app
 import app.config.config as conf
 
 def create_item(sender,room,item_name):

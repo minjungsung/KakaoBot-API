@@ -2,7 +2,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 from app.service import enhance_serv
-from app import app
+from app.api import app
 
 
 def save_guiness_job():

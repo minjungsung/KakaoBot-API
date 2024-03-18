@@ -1,6 +1,6 @@
 
 from sqlalchemy.sql import func
-from app import db
+from app.api import db
 
 
 class enhancement_game(db.Model):
