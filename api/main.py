@@ -43,6 +43,11 @@ def do_something():
     sender = request.args.get("sender")
     room = request.args.get("room")
     isGroupChat = request.args.get("isGroupChat")
+    print("msg", msg)
+    print("sender", sender)
+    print("room", room)
+    print("isGroupChat", isGroupChat)
+    print("msgSplit[0]", msgSplit[0])
 
     # db 로깅
     new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
