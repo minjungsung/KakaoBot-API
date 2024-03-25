@@ -1,5 +1,4 @@
 import bs4, requests, random
-from selenium import webdriver
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import random
