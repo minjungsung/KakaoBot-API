@@ -254,11 +254,11 @@ NAME
 #                     "명령을 인식할 수 없습니다.\n!명령어로 명령어를 조회할 수 있습니다."
 #                 )
 
-#     except Exception as e:
-#         print(e)
-#         traceback.print_exc()
-#         app.logger.error(f"response = {e}")
-#         res = "오류가 발생하였습니다."
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        app.logger.error(f"response = {e}")
+        res = "오류가 발생하였습니다."
 
 #     if res != "none":
 #         # 로그 생성
@@ -266,5 +266,5 @@ NAME
 #             f"sender = {sender}, msg = {msg}, room = {room}, isGroupChat = {isGroupChat}"
 #         )
 #         app.logger.info(f"response = {res}")
-    return ''
+    return res
 
