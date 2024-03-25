@@ -35,18 +35,24 @@ horoscope_commands = [
     "물고기자리",
 ]
 
+
 @app.route("/api/chat", methods=["GET"])
 def chat():
+    print("Recevied chat")
     msg = request.args.get("msg")
     sender = request.args.get("sender")
     room = request.args.get("room")
     isGroupChat = request.args.get("isGroupChat")
 
     # db 로깅
-    new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
-    db.session.add(new_chat)
-    db.session.commit()
-    return
+    try:    
+        new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
+        db.session.add(new_chat)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        
+    return ""
 
 
 @app.route("/api/command", methods=["GET"])
