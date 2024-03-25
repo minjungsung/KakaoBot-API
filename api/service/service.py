@@ -647,11 +647,14 @@ def getChatRank(room):
 
     res = f"[{room}]채팅방의 채팅순위입니다.\n총 채팅 갯수 : {total_count}개\n\n"
     for index, result in enumerate(results):
-        level = round(((result.cnt - min_count) / level_range) * 9) + 1
+        if level_range == 0:
+            # If level_range is 0, avoid division by zero. Set level to a default value or handle accordingly.
+            level = 1  # Example default value, adjust as needed
+        else:
+            level = round(((result.cnt - min_count) / level_range) * 9) + 1
         res += f"{index+1}위 {result.sender} - 채팅 {result.cnt}개 ({result.cnt/total_count*100:.1f}% Lv.{level})\n\n"
 
     return res.strip()
-
 
 def getMenu(sender):
     from api.model.menues import menues

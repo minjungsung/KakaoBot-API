@@ -23,4 +23,4 @@ with app.app_context():
     db.create_all()
 
 migrate = Migrate(app, db)
-from api.main import main
+from api import main

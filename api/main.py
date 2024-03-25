@@ -204,7 +204,6 @@ NAME
                     else:
                         res = "숫자를 입력해주세요.\n사용법: !로또 [세트 개수]"
                 else:
-                    print("dasd")
                     res = service.getLottery(sender, 1)
             elif msgSplit[0] == "!구글":
                 if len(msgSplit) != 1:
@@ -362,6 +361,7 @@ NAME
 
 @app.route("/enhancement", methods=["GET"])
 def enhancement():
+    print("minjung")
     msg = request.args.get("msg")
     sender = request.args.get("sender")
     room = request.args.get("room")
