@@ -290,13 +290,6 @@ NAME
 
             elif msgSplit[0] == "!테스트":
                 res = service.getRandomTest()
-            elif msgSplit[0] == "!주식":
-                if len(msgSplit) != 1:
-                    stock_name = msg.replace(msgSplit[0], "").strip()
-                    stock_name = stock_name.replace(" ", "")
-                    res = service.getStockData(stock_name, sender)
-                else:
-                    res = "종목명을 입력해주세요. \n사용법 : !주식 [종목명]"
             elif msgSplit[0] in ["!한강온도", "!한강물온도"]:
                 res = service.getHanRiverTemp()
             elif msgSplit[0] == "!자살":

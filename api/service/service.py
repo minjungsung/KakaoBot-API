@@ -8,7 +8,6 @@ from sqlalchemy.sql import func
 from playwright.sync_api import sync_playwright
 
 import re
-from pykrx import stock
 
 def getTodayWeather(area):
     with sync_playwright() as p:
@@ -617,90 +616,6 @@ def extract_url(input_string):
         return url.group(0)
     else:
         return None
-
-
-def getStockData(stock_name, sender):
-    stock_code = get_stock_code(stock_name)
-    if stock_code == "none":
-        return "존재하지 않는 종목입니다."
-
-    url = "https://finance.naver.com/item/main.naver?code=" + stock_code
-
-    driver.get(url)
-    time.sleep(1)
-    html_source = driver.page_source
-    soup = BeautifulSoup(html_source, "html.parser")
-    today = soup.find("div", {"class": "rate_info"})
-
-    down_emoji = "\U0001F4C9"
-    up_emoji = "\U0001F4C8"
-    now = datetime.now()
-    formatted_now = now.strftime("%Y.%m.%d %H:%M")
-
-    today_price = today.select("div p.no_today em > span ")
-    today_price = "".join([item.text for item in today_price])
-
-    no_exday = today.select("div p.no_exday > em")
-
-    if len(no_exday) > 0:
-        no_exday_text1 = (no_exday[0].text).replace("\n", "")
-        no_exday_text2 = (no_exday[1].text).replace("\n", "")
-    else:
-        no_exday_text1 = "정보없음"
-        no_exday_text2 = "정보없음"
-
-    no_exday_info = ""
-
-    if "상승" in no_exday_text1:
-        no_exday_info = f"전일대비 {up_emoji}{no_exday_text1} | {no_exday_text2}"
-    elif "하락" in no_exday_text1:
-        no_exday_info = f"전일대비 {down_emoji}{no_exday_text1} | {no_exday_text2}"
-    else:
-        no_exday_info = f"전일대비 {no_exday_text1} | {no_exday_text2}"
-
-    summary_info = soup.find("table", {"class": "no_info"})
-    summary = summary_info.select("tbody tr td > em")
-    highest = (summary[1].text).replace("\n", "")
-    lowest = (summary[4].text).replace("\n", "")
-    upper_limit = (summary[2].text).replace("\n", "")
-    lower_limit = (summary[6].text).replace("\n", "")
-    trading_volume = (summary[3].text).replace("\n", "")
-    transaction_amount = (summary[7].text).replace("\n", "")
-    print(upper_limit)
-    print(lower_limit)
-
-    res = f"""\U0001F4B0[{stock_name}]의 실시간 주가정보!\U0001F4B0
-현재시각 : {formatted_now}
-
-시장가 : {today_price}원
-등락율 : {no_exday_info}
-
-고가 : {highest} (상한가:{upper_limit})
-저가 : {lowest} (하한가:{lower_limit})
-거래량 : {trading_volume}
-거래대금 : {transaction_amount}백만
-"""
-    res = res + "\n(출처 : 네이버증권)"
-    return res
-
-
-# 종목명 -> 종목코드
-def get_stock_code(stock_name):
-    now = datetime.now()
-    three_days_ago = datetime.now() - timedelta(days=3)
-    formatted_now = now.strftime("%Y%m%d")
-    formatted_three_days_ago = three_days_ago.strftime("%Y%m%d")
-
-    df = stock.get_market_price_change(
-        formatted_three_days_ago, formatted_now, market="ALL"
-    )
-    row = df[df["종목명"] == stock_name]
-    if len(row) == 0:
-        return "none"
-    else:
-        stock_code = row.index[0]
-
-    return stock_code
 
 
 def getHanRiverTemp():

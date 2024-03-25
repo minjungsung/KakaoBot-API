@@ -9,11 +9,8 @@ Flask==2.3.3
 Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.0.5
 fonttools==4.42.1
-openai==0.28.0
-pykrx==1.0.45
 requests==2.31.0
 SQLAlchemy==2.0.20
 tiktoken==0.5.1
-flask
 playwright
 psycopg2-binary
