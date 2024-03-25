@@ -46,6 +46,7 @@ def chat():
     new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
     db.session.add(new_chat)
     db.session.commit()
+    return
 
 
 @app.route("/api/command", methods=["GET"])
