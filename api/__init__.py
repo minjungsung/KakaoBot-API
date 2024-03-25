@@ -15,9 +15,6 @@ db = SQLAlchemy(app)
 from api.model.chats import chats
 from api.model.menues import menues
 from api.model.sentences import sentences
-from api.model.enhancement_game import enhancement_game
-from api.model.enhancement_guiness import enhancement_guiness
-from api.model.enhancement_history import enhancement_history
 
 with app.app_context():
     db.create_all()
