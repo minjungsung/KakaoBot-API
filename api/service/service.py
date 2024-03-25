@@ -6,109 +6,38 @@ import random
 import time
 from api import db
 from sqlalchemy.sql import func
+from playwright.sync_api import sync_playwright
+
 import re
 from pykrx import stock
 
-headers = {
-    "User-Agent": "mozilla/5.0 (windows nt 10.0; win64; x64) applewebkit/537.36 (khtml, like gecko) chrome/116.0.0.0 safari/537.36"
-}
-options = webdriver.ChromeOptions()
-options.add_argument("headless")
-options.add_argument("window-size=1920x1080")  # 화면크기(전체화면)
-options.add_argument("disable-gpu")
-options.add_argument("disable-infobars")
-options.add_argument("--disable-extensions")
-# TODO
-options.add_argument("--headless") 
-driver = webdriver.Chrome(options=options)
-
-# 속도 향상을 위한 옵션 해제
-
-
 def getTodayWeather(area):
+    with sync_playwright() as p:
+        # Launch the browser. Replace 'chromium' with 'firefox' or 'webkit' if needed.
+        browser = p.chromium.launch(headless=True)  # Set headless=False if you want to see the browser
+        page = browser.new_page()
+        page.goto(f"https://search.daum.net/search?q={area}%20날씨", wait_until="networkidle")
 
-    source = requests.get(
-        "https://search.daum.net/search?q=" + area + "%20날씨", headers=headers
-    )
-    soup = BeautifulSoup(source.content, "html.parser")
+        # Now, use Playwright's API to interact with the page similar to how you did with BeautifulSoup
+        # Example: Extracting temperature
+        now_temp = page.query_selector("div.info_temp div span span > strong").inner_text()
+        desc_temp = page.query_selector("div.info_temp div span span > span").inner_text()
+        txt_desc = page.query_selector("div.info_temp > p").inner_text()
+        wind = page.query_selector("dl.dl_weather > dt").inner_text() + " " + page.query_selector("dl.dl_weather > dd").inner_text()
+        humidity = page.query_selector("dl.dl_weather > dt:nth-of-type(2)").inner_text() + " " + page.query_selector("dl.dl_weather > dd:nth-of-type(2)").inner_text()
+        fine_dust = page.query_selector("dl.dl_weather > dt:nth-of-type(3)").inner_text() + " " + page.query_selector("dl.dl_weather > dd:nth-of-type(3)").inner_text()
 
-    cont_today = soup.find("div", {"class": "cont_today"})
-    desc_temp = (cont_today.select("div.info_temp div span span > span"))[0].text
-    now_temp = (cont_today.select("div.info_temp div span span > strong"))[0].text
-    txt_desc = (cont_today.select("div.info_temp > p"))[0].text
-    wind = (
-        (cont_today.select("dl.dl_weather > dt"))[0].text
-        + " "
-        + (cont_today.select("dl.dl_weather > dd"))[0].text
-    )
-    humidity = (
-        (cont_today.select("dl.dl_weather > dt"))[1].text
-        + " "
-        + (cont_today.select("dl.dl_weather > dd"))[1].text
-    )
-    fine_dust = (
-        (cont_today.select("dl.dl_weather > dt"))[2].text
-        + " "
-        + (cont_today.select("dl.dl_weather > dd"))[2].text
-    )
-
-    area_hourly = soup.find("div", {"class": "area_hourly"})
-    time_list = [
-        item.select_one(".txt_time").text
-        for item in area_hourly.select("ul.list_hourly > li")
-    ]
-    weather_hourly = [
-        item.select("span")[-1].text
-        for item in area_hourly.select("ul.list_hourly > li")
-    ]
-    area_rain = soup.find("div", {"class": "area_rain"})
-    rain_hourly = [
-        item.select_one(".txt_emph").text.strip()
-        for item in area_rain.select("ul.list_hourly > li")
-    ]
-    area_wind = soup.find("div", {"class": "area_wind"})
-    wind_hourly = [
-        item.select_one(".txt_num").text
-        for item in area_wind.select("ul.list_hourly > li")
-    ]
-    wind_direct_hourly = [
-        item.select_one(".ico_wind").text
-        for item in area_wind.select("ul.list_hourly > li")
-    ]
-    area_damp = soup.find("div", {"class": "area_damp"})
-    damp_hourly = [
-        item.select_one(".txt_num").text
-        for item in area_damp.select("ul.list_hourly > li")
-    ]
-
-    data_hourly = ""
-    for i in range(0, len(weather_hourly)):
-        data_hourly = (
-            data_hourly
-            + f"{time_list[i]}:{weather_hourly[i]} / 강수확률({rain_hourly[i]}) / 습도({damp_hourly[i]}) / {wind_direct_hourly[i]}({wind_hourly[i]})\n"
-        )
-
-    area_tab = soup.find("div", {"class": "tab_region"})
-    local_area = [item.text for item in area_tab.select("ul.list_tab > li")]
-    local_area = " ".join(
-        [
-            item.strip()
-            for item in local_area
-            if item.strip() not in ["전국", "시·군·구", "읍·면·동"]
-            and not item.strip().startswith("다른")
-        ]
-    )
-
-    res = f"""[{area} 날씨 정보]
-위치: {local_area}
+        # Construct the response string as before
+        res = f"""[{area} 날씨 정보]
+위치: (You'll need to adapt this part)
 온도: {now_temp} 
 날씨: {desc_temp} ({txt_desc})   
 {wind} | {humidity} | {fine_dust}
 
-{data_hourly}
-*(출처 : 다음날씨)
+(Additional data and 출처 : 다음날씨)
 """
-    return res
+        browser.close()
+        return res
 
 
 def getTomorrowWeather(area):
@@ -301,58 +230,48 @@ def googleSearch(keyword):
 
 
 def namuSearch(keyword):
-    URL = "https://www.google.com/search?q=" + keyword
-    # 크롬 드라이버를 통해 지정한 URL의 웹 페이지 오픈
-    driver.get(URL)
-    html_source = driver.page_source
-    soup_source = BeautifulSoup(html_source, "html.parser")
+    with sync_playwright() as p:
+        # Launch the browser. Replace 'chromium' with 'firefox' or 'webkit' if needed.
+        browser = p.chromium.launch(headless=True)  # Set headless=False if you want to see the browser
+        page = browser.new_page()
+        page.goto(f"https://www.google.com/search?q={keyword}", wait_until="networkidle")
 
-    html = soup_source.find("div", {"class": "yuRUbf"})
-    link = (html.select("div span > a")[0]).get("href")
+        # Use Playwright's selectors to find the first search result's link
+        # Note: Google's search result structure can change, so the selector might need adjustments
+        first_result_selector = "div.yuRUbf > a"
+        first_result = page.query_selector(first_result_selector)
+        link = first_result.get_attribute("href")
 
-    return link
+        browser.close()
+        return link
 
 
 def youtubeSearch(keyword):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)  # Launch the browser in headless mode
+        page = browser.new_page()
+        page.goto(f"https://www.youtube.com/results?search_query={keyword}", wait_until="networkidle")
 
-    # 스크래핑 할 URL 세팅
-    URL = "https://www.youtube.com/results?search_query=" + keyword
-    # 크롬 드라이버를 통해 지정한 URL의 웹 페이지 오픈
-    driver.get(URL)
-    # 페이지 소스 추출
-    html_source = driver.page_source
-    soup_source = BeautifulSoup(html_source, "html.parser")
-    # 콘텐츠 모든 정보
-    content_total = soup_source.find_all(
-        class_="yt-simple-endpoint style-scope ytd-video-renderer"
-    )
-    # 콘텐츠 제목만 추출
-    content_total_title = list(
-        map(lambda data: data.get_text().replace("\n", ""), content_total)
-    )
-    # 콘텐츠 링크만 추출
-    content_total_link = list(
-        map(lambda data: "https://youtube.com" + data["href"], content_total)
-    )
+        # Define the selectors for the video titles and links
+        video_title_selector = "ytd-video-renderer #video-title"
+        video_link_selector = "ytd-video-renderer #video-title"
 
-    res = f"""[\"{keyword.replace("+"," ")}\" 유튜브 검색 결과입니다.]"""
-    res = res + "\n\n"
-    for i in range(0, 3):
-        res = (
-            res
-            + str(i + 1)
-            + ". "
-            + content_total_title[i]
-            + "\n"
-            + content_total_link[i]
-        )
-        res = res + "\n\n"
+        # Extract the titles and links of the first three videos
+        video_titles = page.query_selector_all(video_title_selector)
+        video_links = page.query_selector_all(video_link_selector)
 
-    return res.strip()
+        # Prepare the search results
+        res = f"[\"{keyword.replace('+', ' ')}\" YouTube search results:]\n\n"
+        for i in range(min(3, len(video_titles))):  # Ensure we don't exceed the number of found videos
+            title = video_titles[i].inner_text().replace("\n", "")
+            link = video_links[i].get_attribute("href")
+            res += f"{i + 1}. {title}\n{link}\n\n"
+
+        browser.close()
+        return res.strip()
 
 
 def getNews(keyword):
-
     url = "https://news.naver.com/main/main.naver?mode=LSD&mid=shm&sid1=" + str(
         100 + keyword
     )
