@@ -51,7 +51,8 @@ def chat():
         db.session.commit()
     except Exception as e:
         print(e)
-        
+        traceback.print_exc()
+        res = "오류가 발생하였습니다."        
     return ""
 
 
