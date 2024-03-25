@@ -15,3 +15,5 @@ requests==2.31.0
 SQLAlchemy==2.0.20
 tiktoken==0.5.1
 flask
+playwright
+psycopg2
