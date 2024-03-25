@@ -1,5 +1,5 @@
 from flask import request
-from api.service import service, chatgpt
+from api.service import service
 import logging
 from logging.handlers import RotatingFileHandler
 from api import app, db
