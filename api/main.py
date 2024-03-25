@@ -47,7 +47,7 @@ def do_something():
     print("sender", sender)
     print("room", room)
     print("isGroupChat", isGroupChat)
-    print("msgSplit[0]", msgSplit[0])
+    
 
     # db 로깅
     new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
@@ -55,6 +55,7 @@ def do_something():
     db.session.commit()
 
     msgSplit = msg.split()
+    print("msgSplit[0]", msgSplit[0])
     res = "none"
     try:
         if "vs" in msg:
