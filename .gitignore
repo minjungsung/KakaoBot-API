@@ -6,6 +6,8 @@ instance/*
 !instance/.gitignore
 .webassets-cache
 .env
+app/config
+config.py
 app.log
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
@@ -272,4 +274,3 @@ pyvenv.cfg
 pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/flask,virtualenv,python
-.vercel
