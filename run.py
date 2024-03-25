@@ -1,4 +1,4 @@
-from app.api import app
+from api import app
 from app.util.scheduler import scheduler
 
 if __name__ == "__main__":

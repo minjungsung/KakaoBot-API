@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import random
 import time
-from app.api import db
+from api import db
 from sqlalchemy.sql import func
 import re
 from pykrx import stock

@@ -1,6 +1,6 @@
 
 from sqlalchemy.sql import func
-from app.api import db
+from ..api import db
 
 
 class chats(db.Model):

@@ -3,7 +3,7 @@ from app.service import service, chatgpt
 from app.service import enhance_serv
 import logging
 from logging.handlers import RotatingFileHandler
-from app.api import app, db
+from api import app, db
 import traceback
 import app.config.config as config
 from app.model.chats import chats
