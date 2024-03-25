@@ -49,7 +49,7 @@ horoscope_commands = [
 ]
 
 
-@app.route("/dosomething", methods=["GET"])
+@app.route("/api", methods=["GET"])
 def do_something():
 
     msg = request.args.get("msg")
