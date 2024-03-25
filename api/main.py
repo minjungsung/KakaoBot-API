@@ -1,6 +1,5 @@
 from flask import request
 from api.service import service, chatgpt
-from api.service import enhance_serv
 import logging
 from logging.handlers import RotatingFileHandler
 from api import app, db
@@ -87,12 +86,8 @@ NAME
 [정보 검색]
 
 >>  !뉴스
->>  !날씨
-        !날씨 [지역명]
 >>  !예보
         !예보 [지역명]
->>  !해외날씨
-        !해외날씨 [지역명]
 >>  !구글
         !구글 [검색어]
 >>  !나무
@@ -109,35 +104,16 @@ NAME
 >>  !멜론차트
 >>  !영화
 
-[재밋거리]
+[재미거리]
 
 >>  !메뉴추천
->>  !운세
-        띠별운세 - !운세 [띠]
-        별자리운세 - !운세 [별자리]
 >>  !로또 [숫자]
 >>  vs 
         [키워드] vs [키워드]
 >> !채팅순위
 >> !한강온도
 
-[게임]
-
->> !강화
 """
-
-            elif msgSplit[0] == "!날씨":
-                area = ""
-                if len(msgSplit) != 1:
-                    if len(msgSplit) >= 3:
-                        for i in range(1, len(msgSplit)):
-                            print(i)
-                            area = area + msgSplit[i] + " "
-                    else:
-                        area = msgSplit[1]
-                    res = service.getTodayWeather(area.strip())
-                else:
-                    res = "지역을 입력해주세요. \n사용법 : !날씨 [지역명]"
 
             elif msgSplit[0] == "!예보":
                 area = ""
@@ -152,37 +128,7 @@ NAME
                 else:
                     res = "지역을 입력해주세요. \n사용법 : !예보 [지역명]"
 
-            elif msgSplit[0] == "!해외날씨":
-                area = ""
-                if len(msgSplit) != 1:
-                    if len(msgSplit) >= 3:
-                        for i in range(1, len(msgSplit)):
-                            print(i)
-                            area = area + msgSplit[i] + " "
-                    else:
-                        area = msgSplit[1]
-                    res = service.getOverseasWeather(area.strip())
-                else:
-                    res = "지역을 입력해주세요. \n사용법 : !해외날씨 [지역명]"
 
-            elif msgSplit[0] == "!운세":
-                if len(msgSplit) != 1:
-                    if len(msgSplit) < 3:
-                        keyword = msgSplit[1]
-                        if keyword in zodiac_commands:
-                            res = service.getZodiac(keyword)
-                        elif keyword in horoscope_commands:
-                            res = service.getHoroscope(keyword)
-                        else:
-                            res = "다시 입력해 주세요."
-                else:
-                    res = """검색어를 입력해주세요. 
-
-사용법 : 
-!운세 [쥐띠|소띠|호랑이띠|토끼띠|용띠|뱀띠|말띠|양띠|원숭이띠|닭띠|개띠|돼지띠]
-
-!운세 [양자리|황소자리|쌍둥이자리|게자리|사자자리|처녀자리|천칭자리|전갈자리|사수자리|염소자리|물병자리|물고기자리]"
-"""
             elif msgSplit[0] == "!로또":
                 print(len(msgSplit))
                 if len(msgSplit) != 1:
@@ -322,58 +268,3 @@ NAME
         app.logger.info(f"response = {res}")
     return res
 
-
-# @app.route("/enhancement", methods=["GET"])
-# def enhancement():
-#     msg = request.args.get("msg")
-#     sender = request.args.get("sender")
-#     room = request.args.get("room")
-#     isGroupChat = request.args.get("isGroupChat")
-
-#     new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
-#     db.session.add(new_chat)
-#     db.session.commit()
-#     res = "none"
-
-#     msgSplit = msg.split()
-#     try:
-#         if len(msgSplit) == 1:
-#             res = enhance_serv.get_manual()
-#         elif msgSplit[1] == "기네스":
-#             if len(msgSplit) < 3:
-#                 res = enhance_serv.get_guiness(room)
-#         elif msgSplit[1] == "순위":
-#             if len(msgSplit) < 3:
-#                 res = enhance_serv.get_room_rank(room)
-#             elif msgSplit[2] == "서버":
-#                 res = "강화 순위 서버"
-#         elif msgSplit[1] == "삭제":
-#             if len(msgSplit) < 3:
-#                 res = "삭제할 아이템명을 입력해주세요."
-#             else:
-#                 item_name = (
-#                     msg.replace(msgSplit[0], "").replace(msgSplit[1], "").strip()
-#                 )
-#                 res = enhance_serv.delete_my_item(sender, room, item_name)
-#         elif msgSplit[1] == "보유":
-#             res = enhance_serv.get_my_item(sender, room)
-#         elif msgSplit[1] == "내기록":
-#             res = enhance_serv.get_my_record(sender, room)
-#         elif msgSplit[1] == "무덤":
-#             res = enhance_serv.get_my_grave(sender, room)
-#         else:
-#             item_name = msg.replace(msgSplit[0], "").strip()
-#             res = enhance_serv.create_item(sender, room, item_name)
-#     except Exception as e:
-#         print(e)
-#         traceback.print_exc()
-#         app.logger.error(f"response = {e}")
-#         res = "오류가 발생하였습니다."
-
-#     if res != "none":
-#         # 로그 생성
-#         app.logger.info(
-#             f"sender = {sender}, msg = {msg}, room = {room}, isGroupChat = {isGroupChat}"
-#         )
-#         app.logger.info(f"response = {res}")
-#     return res
