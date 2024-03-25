@@ -35,19 +35,26 @@ horoscope_commands = [
     "물고기자리",
 ]
 
+@app.route("/api/chat", methods=["GET"])
+def chat():
+    msg = request.args.get("msg")
+    sender = request.args.get("sender")
+    room = request.args.get("room")
+    isGroupChat = request.args.get("isGroupChat")
 
-@app.route("/api", methods=["GET"])
-def do_something():
+    # db 로깅
+    new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
+    db.session.add(new_chat)
+    db.session.commit()
+
+
+@app.route("/api/command", methods=["GET"])
+def command():
 
     msg = request.args.get("msg")
     sender = request.args.get("sender")
     room = request.args.get("room")
     isGroupChat = request.args.get("isGroupChat")
-    print("msg", msg)
-    print("sender", sender)
-    print("room", room)
-    print("isGroupChat", isGroupChat)
-    
 
     # db 로깅
     new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
@@ -55,7 +62,6 @@ def do_something():
     db.session.commit()
 
     msgSplit = msg.split()
-    print("msgSplit[0][0]", msgSplit[0][0])
     res = "none"
     try:
         if "vs" in msg:
@@ -101,7 +107,7 @@ NAME
 >>  .메뉴추천
 >>  .로또 [숫자]
 >>  vs 
-        [키워드] vs [키워드]
+    [키워드] vs [키워드]
 >> .채팅순위
 >> .한강온도
 
@@ -224,7 +230,6 @@ NAME
             elif msgSplit[0] == ".섹스":
                 res = service.getHentai()
             elif msgSplit[0] == ".넌뭐야":
-                
                 res = "저는 민정봇이에오"
             elif msgSplit[0] in [
                 "!어흥",
