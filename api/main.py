@@ -59,11 +59,6 @@ def do_something():
     room = request.args.get("room")
     isGroupChat = request.args.get("isGroupChat")
 
-    # 개발용... 주인이 아니면 다 넘김
-    # if sender != "주인":
-    #     res = "none"
-    #     return res
-
     # db 로깅
     new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
     db.session.add(new_chat)
@@ -80,12 +75,10 @@ def do_something():
 
             if msgSplit[0] in ["!안녕", "!명령어", "!도움말", "!help"]:
                 res = f"""안녕하세요, {sender}님!\U0001F60D
-민초사랑 나라사랑 챗봇 민초봇입니다\U0001F603
-
-<MintchocoBot 커맨드 매뉴얼>
+<민정봇 커맨드 매뉴얼>
 
 NAME
-    민초봇 -- MintChocoBot
+    민정봇
 
 [기본 명령어]
     !명령어, !도움말, !help : 커맨드 목록
@@ -113,10 +106,6 @@ NAME
 >>  !실검
 >>  !환율
 >>  !비트
->>  !주식
-        !주식 [종목명]
->>  !챗
-        !챗 [질문] (ps. !챗 리셋|reset|초기화 시 리셋됨)
 >>  !멜론차트
 >>  !영화
 
@@ -130,7 +119,6 @@ NAME
 >>  vs 
         [키워드] vs [키워드]
 >> !채팅순위
->> !테스트
 >> !한강온도
 
 [게임]
@@ -277,19 +265,6 @@ NAME
                 res = service.getMenu(sender)
             elif msgSplit[0] == "!채팅순위":
                 res = service.getChatRank(room)
-            elif msgSplit[0] == "!챗":
-                # if room == "방구석 인력 사무소":
-                #     res = "당신의 질문. 차단되었다. 그만물어봐라"
-                #     res = "현재 수정중입니다. 해당 서비스를 이용하실 수 없습니다."
-                #     return res
-                if len(msgSplit) != 1:
-                    question = msg.replace(msgSplit[0], "").strip()
-                    res = chatgpt.requestApi(question, sender)
-                else:
-                    res = "챗 GPT에게 질문을 입력해주세요. \n사용법 : !챗 [질문]"
-
-            elif msgSplit[0] == "!테스트":
-                res = service.getRandomTest()
             elif msgSplit[0] in ["!한강온도", "!한강물온도"]:
                 res = service.getHanRiverTemp()
             elif msgSplit[0] == "!자살":
@@ -314,7 +289,7 @@ NAME
             elif msgSplit[0] == "!섹스":
                 res = service.getHentai()
             elif msgSplit[0] == "!넌뭐야":
-                res = "저는 민초봇이에오"
+                res = "저는 민정봇이에오"
             elif msgSplit[0] in [
                 "!어흥",
                 "!어흥!",
@@ -324,10 +299,6 @@ NAME
                 "!어흥어흥!",
             ]:
                 res = "어흥아흥"
-            elif msgSplit[0] in ["!민초", "!민트초코"]:
-                res = "민초봇은 민초단에 충성을 다하며 민트초코를 열렬히 응원/지지/연대합니다."
-            elif msgSplit[0] in ["!반민초"]:
-                res = "반민초 척살단 모집(1/999,999,999,999)"
             elif msgSplit[0] in ["!멜론차트", "!멜론"]:
                 res = service.getMelonChart()
             elif msgSplit[0] in ["!영화", "!현재상영작", "!영화추천"]:
@@ -352,58 +323,57 @@ NAME
     return res
 
 
-@app.route("/enhancement", methods=["GET"])
-def enhancement():
-    print("minjung")
-    msg = request.args.get("msg")
-    sender = request.args.get("sender")
-    room = request.args.get("room")
-    isGroupChat = request.args.get("isGroupChat")
+# @app.route("/enhancement", methods=["GET"])
+# def enhancement():
+#     msg = request.args.get("msg")
+#     sender = request.args.get("sender")
+#     room = request.args.get("room")
+#     isGroupChat = request.args.get("isGroupChat")
 
-    new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
-    db.session.add(new_chat)
-    db.session.commit()
-    res = "none"
+#     new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
+#     db.session.add(new_chat)
+#     db.session.commit()
+#     res = "none"
 
-    msgSplit = msg.split()
-    try:
-        if len(msgSplit) == 1:
-            res = enhance_serv.get_manual()
-        elif msgSplit[1] == "기네스":
-            if len(msgSplit) < 3:
-                res = enhance_serv.get_guiness(room)
-        elif msgSplit[1] == "순위":
-            if len(msgSplit) < 3:
-                res = enhance_serv.get_room_rank(room)
-            elif msgSplit[2] == "서버":
-                res = "강화 순위 서버"
-        elif msgSplit[1] == "삭제":
-            if len(msgSplit) < 3:
-                res = "삭제할 아이템명을 입력해주세요."
-            else:
-                item_name = (
-                    msg.replace(msgSplit[0], "").replace(msgSplit[1], "").strip()
-                )
-                res = enhance_serv.delete_my_item(sender, room, item_name)
-        elif msgSplit[1] == "보유":
-            res = enhance_serv.get_my_item(sender, room)
-        elif msgSplit[1] == "내기록":
-            res = enhance_serv.get_my_record(sender, room)
-        elif msgSplit[1] == "무덤":
-            res = enhance_serv.get_my_grave(sender, room)
-        else:
-            item_name = msg.replace(msgSplit[0], "").strip()
-            res = enhance_serv.create_item(sender, room, item_name)
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
-        app.logger.error(f"response = {e}")
-        res = "오류가 발생하였습니다."
+#     msgSplit = msg.split()
+#     try:
+#         if len(msgSplit) == 1:
+#             res = enhance_serv.get_manual()
+#         elif msgSplit[1] == "기네스":
+#             if len(msgSplit) < 3:
+#                 res = enhance_serv.get_guiness(room)
+#         elif msgSplit[1] == "순위":
+#             if len(msgSplit) < 3:
+#                 res = enhance_serv.get_room_rank(room)
+#             elif msgSplit[2] == "서버":
+#                 res = "강화 순위 서버"
+#         elif msgSplit[1] == "삭제":
+#             if len(msgSplit) < 3:
+#                 res = "삭제할 아이템명을 입력해주세요."
+#             else:
+#                 item_name = (
+#                     msg.replace(msgSplit[0], "").replace(msgSplit[1], "").strip()
+#                 )
+#                 res = enhance_serv.delete_my_item(sender, room, item_name)
+#         elif msgSplit[1] == "보유":
+#             res = enhance_serv.get_my_item(sender, room)
+#         elif msgSplit[1] == "내기록":
+#             res = enhance_serv.get_my_record(sender, room)
+#         elif msgSplit[1] == "무덤":
+#             res = enhance_serv.get_my_grave(sender, room)
+#         else:
+#             item_name = msg.replace(msgSplit[0], "").strip()
+#             res = enhance_serv.create_item(sender, room, item_name)
+#     except Exception as e:
+#         print(e)
+#         traceback.print_exc()
+#         app.logger.error(f"response = {e}")
+#         res = "오류가 발생하였습니다."
 
-    if res != "none":
-        # 로그 생성
-        app.logger.info(
-            f"sender = {sender}, msg = {msg}, room = {room}, isGroupChat = {isGroupChat}"
-        )
-        app.logger.info(f"response = {res}")
-    return res
+#     if res != "none":
+#         # 로그 생성
+#         app.logger.info(
+#             f"sender = {sender}, msg = {msg}, room = {room}, isGroupChat = {isGroupChat}"
+#         )
+#         app.logger.info(f"response = {res}")
+#     return res
