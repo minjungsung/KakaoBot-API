@@ -6,19 +6,6 @@ from api import app, db
 import traceback
 from api.model.chats import chats
 
-
-app.logger.setLevel(logging.INFO)
-# 파일 핸들러 설정
-log_handler = RotatingFileHandler(
-    "./logs/app.log", maxBytes=1024 * 1024 * 10, backupCount=50, encoding="utf-8"
-)
-log_handler.setFormatter(
-    logging.Formatter(
-        "%(asctime)s %(levelname)s: %(message)s " "[in %(pathname)s:%(lineno)d]"
-    )
-)
-app.logger.addHandler(log_handler)
-
 zodiac_commands = [
     "쥐띠",
     "소띠",
@@ -254,14 +241,7 @@ NAME
     except Exception as e:
         print(e)
         traceback.print_exc()
-        app.logger.error(f"response = {e}")
         res = "오류가 발생하였습니다."
 
-    if res != "none":
-        # 로그 생성
-        app.logger.info(
-            f"sender = {sender}, msg = {msg}, room = {room}, isGroupChat = {isGroupChat}"
-        )
-        app.logger.info(f"response = {res}")
     return res
 
