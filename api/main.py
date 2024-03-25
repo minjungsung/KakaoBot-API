@@ -45,14 +45,16 @@ def chat():
     isGroupChat = request.args.get("isGroupChat")
 
     # db 로깅
-    try:    
-        new_chat = chats(room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat))
+    try:
+        new_chat = chats(
+            room=room, sender=sender, msg=msg, isGroupChat=bool(isGroupChat)
+        )
         db.session.add(new_chat)
         db.session.commit()
     except Exception as e:
         print(e)
         traceback.print_exc()
-        res = "오류가 발생하였습니다."        
+        res = "오류가 발생하였습니다."
     return ""
 
 
@@ -91,48 +93,32 @@ NAME
 *대괄호 [ ] 빼고 입력해주세요.    
 [정보 검색]
 
->>  .뉴스
->>  .예보
-        .예보 [지역명]
->>  .구글
-        .구글 [검색어]
->>  .나무
-        .나무 [검색어]
->>  .유튜브
-        .유튜브 [검색어]
->>  .맛집        
-        .맛집 [검색어/지역명]
->>  .지도
-        .지도 [지역명]
->>  .실검
->>  .환율
->>  .비트
->>  .멜론차트
->>  .영화
-
-[재미거리]
-
->>  .메뉴추천
+>>  .구글 [검색어]
+>>  .맛집 [검색어/지역명]
 >>  .로또 [숫자]
->>  vs 
-    [키워드] vs [키워드]
->> .채팅순위
->> .한강온도
+>>  .채팅순위
+>>  .넌뭐야
 
 """
-
-            elif msgSplit[0] == ".예보":
+            elif msgSplit[0] == ".넌뭐야":
+                res = "저는 민정봇이에오"
+                
+            elif msgSplit[0] == ".구글":
+                if len(msgSplit) != 1:
+                    keyword = msg.replace(msgSplit[0], "").strip()
+                    keyword = keyword.replace(" ", "+")
+                    res = service.googleSearch(keyword)
+                else:
+                    res = "검색어를 입력해주세요. \n사용법 : .구글 [검색어]"          
+                    
+            elif msgSplit[0] == ".맛집":
                 area = ""
                 if len(msgSplit) != 1:
-                    if len(msgSplit) >= 3:
-                        for i in range(1, len(msgSplit)):
-                            print(i)
-                            area = area + msgSplit[i] + " "
-                    else:
-                        area = msgSplit[1]
-                    res = service.getTomorrowWeather(area.strip())
+                    area = msg.replace(msgSplit[0], "").strip()
+                    area = area.replace(" ", "+")
+                    res = service.getRestaurantByArea(area.strip())
                 else:
-                    res = "지역을 입력해주세요. \n사용법 : .예보 [지역명]"
+                    res = "지역을 입력해주세요. \n사용법 : .맛집 [지역명]"
 
             elif msgSplit[0] == ".로또":
                 print(len(msgSplit))
@@ -144,117 +130,108 @@ NAME
                         res = "숫자를 입력해주세요.\n사용법: .로또 [세트 개수]"
                 else:
                     res = service.getLottery(sender, 1)
-            elif msgSplit[0] == ".구글":
-                if len(msgSplit) != 1:
-                    keyword = msg.replace(msgSplit[0], "").strip()
-                    keyword = keyword.replace(" ", "+")
-                    res = service.googleSearch(keyword)
-                else:
-                    res = "검색어를 입력해주세요. \n사용법 : .구글 [검색어]"
-
-            elif msgSplit[0] == ".나무":
-                if len(msgSplit) != 1:
-                    keyword = msg.replace(msgSplit[0], "").strip()
-                    keyword = keyword.replace(" ", "+")
-                    res = service.namuSearch(keyword)
-                else:
-                    res = "검색어를 입력해주세요. \n사용법 : .나무 [검색어]"
-            elif msgSplit[0] == ".유튜브":
-                if len(msgSplit) != 1:
-                    keyword = msg.replace(msgSplit[0], "").strip()
-                    keyword = keyword.replace(" ", "+")
-                    print(keyword)
-                    res = service.youtubeSearch(keyword)
-                else:
-                    res = "검색어를 입력해주세요. \n사용법 : .유튜브 [검색어]"
-            elif msgSplit[0] == ".뉴스":
-                if len(msgSplit) != 1:
-                    keyword = msg.replace(msgSplit[0], "").strip()
-                    if keyword.isdigit():
-                        keyword = int(keyword)
-                        if keyword < 5:
-                            res = service.getNews(keyword)
-                        else:
-                            res = "분야를 다시 입력해 주세요."
-                    else:
-                        keyword = keyword.replace(" ", "+")
-                        res = service.getNewsSearch(keyword)
-                else:
-                    res = """분야를 입력해주세요.
-사용법 : !뉴스 [0|1|2|3|4|검색어]
-
-0 : 정치
-1 : 경제
-2 : 사회
-3 : 생활/문화
-4 : IT/과학
-검색어 : 관련 뉴스 검색
-"""
-            elif msgSplit[0] == ".실검":
-                res = service.realtime()
-            elif msgSplit[0] == ".환율":
-                res = service.getExchangeRate()
-            elif msgSplit[0] == ".비트":
-                res = service.getAllCoins()
-            elif msgSplit[0] == ".맛집":
-                area = ""
-                if len(msgSplit) != 1:
-                    area = msg.replace(msgSplit[0], "").strip()
-                    area = area.replace(" ", "+")
-                    res = service.getRestaurantByArea(area.strip())
-                else:
-                    res = "지역을 입력해주세요. \n사용법 : .맛집 [지역명]"
-            elif msgSplit[0] == ".지도":
-                area = ""
-                if len(msgSplit) != 1:
-                    area = msg.replace(msgSplit[0], "").strip()
-                    area = area.replace(" ", "+")
-                    res = service.getMapSearch(area.strip())
-                else:
-                    res = "지역을 입력해주세요. \n사용법 : .지도 [지역명]"
-            elif msgSplit[0] in [".메뉴추천", ".점메추", ".저메추"]:
-                res = service.getMenu(sender)
+                    
             elif msgSplit[0] == ".채팅순위":
-                res = service.getChatRank(room)
-            elif msgSplit[0] in [".한강온도", ".한강물온도"]:
-                res = service.getHanRiverTemp()
-            elif msgSplit[0] == ".자살":
-                res = service.getSuicide(sender)
-            elif msgSplit[0] in [
-                "!고마워",
-                "!감사해",
-                "!넌최고야",
-                "!사랑해",
-                "!재밌어",
-            ]:
-                res = service.getThanks()
-            elif msgSplit[0] == ".강퇴":
-                if len(msgSplit) != 1:
-                    name = msg.replace(msgSplit[0], "").strip()
-                    name = name.replace(" ", "")
-                    res = service.getOut(name)
-                else:
-                    res = "강퇴할 사람을 입력해주세요. \n사용법 : .강퇴 [닉네임]"
-            elif msgSplit[0] == ".섹스":
-                res = service.getHentai()
-            elif msgSplit[0] == ".넌뭐야":
-                res = "저는 민정봇이에오"
-            elif msgSplit[0] in [
-                "!어흥",
-                "!어흥!",
-                "!어흥~",
-                "!어흥어흥",
-                "!어흥어흥~",
-                "!어흥어흥!",
-            ]:
-                res = "어흥아흥"
-            elif msgSplit[0] in [".멜론차트", ".멜론"]:
-                res = service.getMelonChart()
-            elif msgSplit[0] in [".영화", ".현재상영작", ".영화추천"]:
-                res = service.getMovieList()
+                res = service.getChatRank(room)        
+            
+#             elif msgSplit[0] == ".예보":
+#                 area = ""
+#                 if len(msgSplit) != 1:
+#                     if len(msgSplit) >= 3:
+#                         for i in range(1, len(msgSplit)):
+#                             print(i)
+#                             area = area + msgSplit[i] + " "
+#                     else:
+#                         area = msgSplit[1]
+#                     res = service.getTomorrowWeather(area.strip())
+#                 else:
+#                     res = "지역을 입력해주세요. \n사용법 : .예보 [지역명]"
+
+#             elif msgSplit[0] == ".나무":
+#                 if len(msgSplit) != 1:
+#                     keyword = msg.replace(msgSplit[0], "").strip()
+#                     keyword = keyword.replace(" ", "+")
+#                     res = service.namuSearch(keyword)
+#                 else:
+#                     res = "검색어를 입력해주세요. \n사용법 : .나무 [검색어]"
+#             elif msgSplit[0] == ".유튜브":
+#                 if len(msgSplit) != 1:
+#                     keyword = msg.replace(msgSplit[0], "").strip()
+#                     keyword = keyword.replace(" ", "+")
+#                     print(keyword)
+#                     res = service.youtubeSearch(keyword)
+#                 else:
+#                     res = "검색어를 입력해주세요. \n사용법 : .유튜브 [검색어]"
+#             elif msgSplit[0] == ".뉴스":
+#                 if len(msgSplit) != 1:
+#                     keyword = msg.replace(msgSplit[0], "").strip()
+#                     if keyword.isdigit():
+#                         keyword = int(keyword)
+#                         if keyword < 5:
+#                             res = service.getNews(keyword)
+#                         else:
+#                             res = "분야를 다시 입력해 주세요."
+#                     else:
+#                         keyword = keyword.replace(" ", "+")
+#                         res = service.getNewsSearch(keyword)
+#                 else:
+#                     res = """분야를 입력해주세요.
+# 사용법 : !뉴스 [0|1|2|3|4|검색어]
+
+# 0 : 정치
+# 1 : 경제
+# 2 : 사회
+# 3 : 생활/문화
+# 4 : IT/과학
+# 검색어 : 관련 뉴스 검색
+# """
+#             elif msgSplit[0] == ".실검":
+#                 res = service.realtime()
+#             elif msgSplit[0] == ".환율":
+#                 res = service.getExchangeRate()
+#             elif msgSplit[0] == ".비트":
+#                 res = service.getAllCoins()
+
+#             elif msgSplit[0] == ".지도":
+#                 area = ""
+#                 if len(msgSplit) != 1:
+#                     area = msg.replace(msgSplit[0], "").strip()
+#                     area = area.replace(" ", "+")
+#                     res = service.getMapSearch(area.strip())
+#                 else:
+#                     res = "지역을 입력해주세요. \n사용법 : .지도 [지역명]"
+#             elif msgSplit[0] in [".메뉴추천", ".점메추", ".저메추"]:
+#                 res = service.getMenu(sender)
+
+#             elif msgSplit[0] in [".한강온도", ".한강물온도"]:
+#                 res = service.getHanRiverTemp()
+#             elif msgSplit[0] == ".자살":
+#                 res = service.getSuicide(sender)
+#             elif msgSplit[0] in [
+#                 "!고마워",
+#                 "!감사해",
+#                 "!넌최고야",
+#                 "!사랑해",
+#                 "!재밌어",
+#             ]:
+#                 res = service.getThanks()
+#             elif msgSplit[0] == ".강퇴":
+#                 if len(msgSplit) != 1:
+#                     name = msg.replace(msgSplit[0], "").strip()
+#                     name = name.replace(" ", "")
+#                     res = service.getOut(name)
+#                 else:
+#                     res = "강퇴할 사람을 입력해주세요. \n사용법 : .강퇴 [닉네임]"
+#             elif msgSplit[0] == ".섹스":
+#                 res = service.getHentai()
+
+#             elif msgSplit[0] in [".멜론차트", ".멜론"]:
+#                 res = service.getMelonChart()
+#             elif msgSplit[0] in [".영화", ".현재상영작", ".영화추천"]:
+#                 res = service.getMovieList()
             else:
                 res = (
-                    "명령을 인식할 수 없습니다.\n!명령어로 명령어를 조회할 수 있습니다."
+                    "명령을 인식할 수 없습니다.\n.명령어로 명령어를 조회할 수 있습니다."
                 )
 
     except Exception as e:
