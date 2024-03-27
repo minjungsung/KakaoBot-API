@@ -94,7 +94,7 @@ NAME
 >>  .구글 [검색어]
 >>  .맛집 [검색어/지역명]
 >>  .로또 [숫자]
->>  .채팅순위
+>>  .채팅순위 [오늘/일주일/한달]
 >>  .넌뭐야
 
 """
@@ -130,7 +130,7 @@ NAME
                     res = service.getLottery(sender, 1)
 
             elif msgSplit[0] == ".채팅순위":
-                res = service.getChatRank(room)
+                res = service.getChatRank(room, msgSplit[1])
 
             #             elif msgSplit[0] == ".예보":
             #                 area = ""

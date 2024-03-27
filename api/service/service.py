@@ -544,29 +544,40 @@ def getMapSearch(area):
     variable = driver.current_url
     return variable
 
-
-def getChatRank(room):
+def getChatRank(room, period):
     from sqlalchemy import desc
     from api.model.chats import chats
+    from datetime import datetime, timedelta
+
+    # Determine the start date based on the period
+    today = datetime.now()
+    if period == '한달':
+        start_date = today - timedelta(days=30)
+    elif period == '일주일':
+        start_date = today - timedelta(days=7)
+    elif period == '오늘':
+        start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+    else:
+        # Default to showing all time if period is not recognized
+        start_date = datetime.min
 
     results = (
         db.session.query(chats.sender, func.count().label("cnt"))
-        .filter(chats.room == room)
+        .filter(chats.room == room, chats.create_date >= start_date)
         .group_by(chats.sender)
         .order_by(desc("cnt"))
         .all()
     )
 
     total_count = sum(result.cnt for result in results)
-    max_count = max(result.cnt for result in results)
-    min_count = min(result.cnt for result in results)
+    max_count = max(result.cnt for result in results) if results else 0
+    min_count = min(result.cnt for result in results) if results else 0
     level_range = max_count - min_count
 
-    res = f"[{room}]채팅방의 채팅순위입니다.\n총 채팅 갯수 : {total_count}개\n\n"
+    res = f"[{room}] 채팅방의 채팅순위입니다. (기간: {period})\n총 채팅 갯수 : {total_count}개\n\n"
     for index, result in enumerate(results):
         if level_range == 0:
-            # If level_range is 0, avoid division by zero. Set level to a default value or handle accordingly.
-            level = 1  # Example default value, adjust as needed
+            level = 1  # Default level when there's no range
         else:
             level = round(((result.cnt - min_count) / level_range) * 9) + 1
         res += f"{index+1}위 {result.sender} - 채팅 {result.cnt}개 ({result.cnt/total_count*100:.1f}% Lv.{level})\n\n"
