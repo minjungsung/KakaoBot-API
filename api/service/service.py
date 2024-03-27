@@ -630,21 +630,25 @@ def extract_url(input_string):
 
 
 def getHanRiverTemp():
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.goto("https://hangang.ivlis.kr/")
-        page.wait_for_timeout(1000)  # Wait for 1 second to ensure the page is loaded
+    # URL of the page to scrape
+    url = "https://hangang.ivlis.kr/"
+    
+    # Send a GET request to the URL
+    response = requests.get(url)
+    
+    # Parse the HTML content of the page
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Use BeautifulSoup's selectors to find the temperature
+    # Assuming the temperature is within an <h2> tag with id="temp1"
+    river_temp_tag = soup.find('h2', id='temp1')
+    river_temp = river_temp_tag.text.strip() if river_temp_tag else "Temperature not found"
 
-        # Use Playwright's selectors to get the temperature and sentence
-        river_temp = page.query_selector("h2#temp1").text_content()
-
-        res = f"""[현재 한강물 온도]
+    res = f"""[현재 한강물 온도]
 
 온도 : {river_temp}
 """
-        browser.close()
-        return res
+    return res
 
 
 def getSorry():
