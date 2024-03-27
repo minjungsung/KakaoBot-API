@@ -14,3 +14,5 @@ tiktoken==0.5.1
 playwright
 psycopg2-binary
 python-dotenv
+selenium
+webdriver-manager

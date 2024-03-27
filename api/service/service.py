@@ -6,24 +6,48 @@ import time
 from api import db
 from sqlalchemy.sql import func
 from playwright.sync_api import sync_playwright
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium import webdriver
 
 import re
+
 
 def getTodayWeather(area):
     with sync_playwright() as p:
         # Launch the browser. Replace 'chromium' with 'firefox' or 'webkit' if needed.
-        browser = p.chromium.launch(headless=True)  # Set headless=False if you want to see the browser
+        browser = p.chromium.launch(
+            headless=True
+        )  # Set headless=False if you want to see the browser
         page = browser.new_page()
-        page.goto(f"https://search.daum.net/search?q={area}%20날씨", wait_until="networkidle")
+        page.goto(
+            f"https://search.daum.net/search?q={area}%20날씨", wait_until="networkidle"
+        )
 
         # Now, use Playwright's API to interact with the page similar to how you did with BeautifulSoup
         # Example: Extracting temperature
-        now_temp = page.query_selector("div.info_temp div span span > strong").inner_text()
-        desc_temp = page.query_selector("div.info_temp div span span > span").inner_text()
+        now_temp = page.query_selector(
+            "div.info_temp div span span > strong"
+        ).inner_text()
+        desc_temp = page.query_selector(
+            "div.info_temp div span span > span"
+        ).inner_text()
         txt_desc = page.query_selector("div.info_temp > p").inner_text()
-        wind = page.query_selector("dl.dl_weather > dt").inner_text() + " " + page.query_selector("dl.dl_weather > dd").inner_text()
-        humidity = page.query_selector("dl.dl_weather > dt:nth-of-type(2)").inner_text() + " " + page.query_selector("dl.dl_weather > dd:nth-of-type(2)").inner_text()
-        fine_dust = page.query_selector("dl.dl_weather > dt:nth-of-type(3)").inner_text() + " " + page.query_selector("dl.dl_weather > dd:nth-of-type(3)").inner_text()
+        wind = (
+            page.query_selector("dl.dl_weather > dt").inner_text()
+            + " "
+            + page.query_selector("dl.dl_weather > dd").inner_text()
+        )
+        humidity = (
+            page.query_selector("dl.dl_weather > dt:nth-of-type(2)").inner_text()
+            + " "
+            + page.query_selector("dl.dl_weather > dd:nth-of-type(2)").inner_text()
+        )
+        fine_dust = (
+            page.query_selector("dl.dl_weather > dt:nth-of-type(3)").inner_text()
+            + " "
+            + page.query_selector("dl.dl_weather > dd:nth-of-type(3)").inner_text()
+        )
 
         # Construct the response string as before
         res = f"""[{area} 날씨 정보]
@@ -230,9 +254,13 @@ def googleSearch(keyword):
 def namuSearch(keyword):
     with sync_playwright() as p:
         # Launch the browser. Replace 'chromium' with 'firefox' or 'webkit' if needed.
-        browser = p.chromium.launch(headless=True)  # Set headless=False if you want to see the browser
+        browser = p.chromium.launch(
+            headless=True
+        )  # Set headless=False if you want to see the browser
         page = browser.new_page()
-        page.goto(f"https://www.google.com/search?q={keyword}", wait_until="networkidle")
+        page.goto(
+            f"https://www.google.com/search?q={keyword}", wait_until="networkidle"
+        )
 
         # Use Playwright's selectors to find the first search result's link
         # Note: Google's search result structure can change, so the selector might need adjustments
@@ -246,9 +274,14 @@ def namuSearch(keyword):
 
 def youtubeSearch(keyword):
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)  # Launch the browser in headless mode
+        browser = p.chromium.launch(
+            headless=True
+        )  # Launch the browser in headless mode
         page = browser.new_page()
-        page.goto(f"https://www.youtube.com/results?search_query={keyword}", wait_until="networkidle")
+        page.goto(
+            f"https://www.youtube.com/results?search_query={keyword}",
+            wait_until="networkidle",
+        )
 
         # Define the selectors for the video titles and links
         video_title_selector = "ytd-video-renderer #video-title"
@@ -260,7 +293,9 @@ def youtubeSearch(keyword):
 
         # Prepare the search results
         res = f"[\"{keyword.replace('+', ' ')}\" YouTube search results:]\n\n"
-        for i in range(min(3, len(video_titles))):  # Ensure we don't exceed the number of found videos
+        for i in range(
+            min(3, len(video_titles))
+        ):  # Ensure we don't exceed the number of found videos
             title = video_titles[i].inner_text().replace("\n", "")
             link = video_links[i].get_attribute("href")
             res += f"{i + 1}. {title}\n{link}\n\n"
@@ -329,29 +364,38 @@ def getNewsSearch(keyword):
 
 
 def realtime():
+    # Setup Selenium WebDriver
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service)
 
+    # URL of the page to scrape
     url = "https://signal.bz/"
     driver.get(url)
-    html_source = driver.page_source
-    soup_source = BeautifulSoup(html_source, "html.parser")
 
-    rank = soup_source.find("div", {"class": "realtime-rank"})
+    # Wait for the page to load dynamically loaded content
+    driver.implicitly_wait(10)  # Adjust the wait time as necessary
 
-    rank_num = rank.find_all("span", "rank-num")
-    rank_text = rank.find_all("span", "rank-text")
+    # Now you can use BeautifulSoup to parse the page source
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+
+    # Your scraping logic here
+    ranks = soup.select(".realtime-rank .rank-layer")
+
     now = datetime.now()
-    # 원하는 형식으로 포맷팅
     formatted_now = now.strftime("%Y.%m.%d %H:%M")
 
-    res = f"""[실시간 검색어 TOP 10]
-검색일시 : {formatted_now}
-"""
-    res = res + "\n"
+    res = f"[실시간 검색어 TOP 10]\n검색일시 : {formatted_now}\n\n"
 
-    for i in range(0, 10):
-        res = res + rank_num[i].text + ". " + rank_text[i].text + "\n"
+    for i, rank in enumerate(ranks[:10]):  # Limit to top 10
+        rank_num = rank.select_one(".rank-num").text.strip()
+        rank_text = rank.select_one(".rank-text").text.strip()
+        res += f"{rank_num}. {rank_text}\n"
 
-    res = res + "\n(출처 : 시그널 실시간검색어)"
+    res += "\n(출처 : 시그널 실시간검색어)"
+    
+    # Don't forget to close the browser
+    driver.quit()
+
     return res.strip()
 
 
@@ -544,6 +588,7 @@ def getMapSearch(area):
     variable = driver.current_url
     return variable
 
+
 def getChatRank(room, period):
     from sqlalchemy import desc
     from api.model.chats import chats
@@ -551,11 +596,11 @@ def getChatRank(room, period):
 
     # Determine the start date based on the period
     today = datetime.now()
-    if period == '한달':
+    if period == "한달":
         start_date = today - timedelta(days=30)
-    elif period == '일주일':
+    elif period == "일주일":
         start_date = today - timedelta(days=7)
-    elif period == '오늘':
+    elif period == "오늘":
         start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
     else:
         # Default to showing all time if period is not recognized
@@ -583,6 +628,7 @@ def getChatRank(room, period):
         res += f"{index+1}위 {result.sender} - 채팅 {result.cnt}개 ({result.cnt/total_count*100:.1f}% Lv.{level})\n\n"
 
     return res.strip()
+
 
 def getMenu(sender):
     from api.model.menues import menues
@@ -632,17 +678,19 @@ def extract_url(input_string):
 def getHanRiverTemp():
     # URL of the page to scrape
     url = "https://hangang.ivlis.kr/"
-    
+
     # Send a GET request to the URL
     response = requests.get(url)
-    
+
     # Parse the HTML content of the page
-    soup = BeautifulSoup(response.content, 'html.parser')
-    
+    soup = BeautifulSoup(response.content, "html.parser")
+
     # Use BeautifulSoup's selectors to find the temperature
     # Assuming the temperature is within an <h2> tag with id="temp1"
-    river_temp_tag = soup.find('h2', id='temp1')
-    river_temp = river_temp_tag.text.strip() if river_temp_tag else "Temperature not found"
+    river_temp_tag = soup.find("h2", id="temp1")
+    river_temp = (
+        river_temp_tag.text.strip() if river_temp_tag else "Temperature not found"
+    )
 
     res = f"""[현재 한강물 온도]
 
@@ -682,55 +730,6 @@ def getOut(name):
 
 def getHentai():
     res = f"변태새끼."
-    return res
-
-
-def getSuicide(sender):
-
-    dead_list = [
-        "과로사",
-        "뇌졸중",
-        "복상사",
-        "심장마비",
-        "자기색정사",
-        "감전사",
-        "과다출혈",
-        "교통사고",
-        "동사",
-        "방사선피폭",
-        "의료사고",
-        "압사",
-        "질식사",
-        "추락사",
-        "실족사",
-        "폭사",
-        "폭행치사",
-        "자연재해",
-        "아사",
-        "고독사",
-        "뇌사",
-        "자살",
-        "타살",
-        "전사",
-        "즉사",
-        "객사",
-        "심장사",
-        "병사",
-        "자연사",
-        "익사",
-        "요절",
-        "교사",
-        "낙사",
-        "참수",
-        "추살",
-        "폭사",
-        "척살",
-        "급사",
-        "독사",
-        "괴사",
-        "수장",
-    ]
-    res = f"{sender}님께 어울리는 죽음은 [{random.choice(dead_list)}]입니다!\U0001F92A"
     return res
 
 

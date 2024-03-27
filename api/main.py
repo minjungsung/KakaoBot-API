@@ -97,6 +97,7 @@ NAME
 >>  .채팅순위 [오늘/일주일/한달]
 >>  .넌뭐야
 >>  .한강온도
+>>  .실검
 
 """
             elif msgSplit[0] == ".넌뭐야":
@@ -184,8 +185,8 @@ NAME
             # 4 : IT/과학
             # 검색어 : 관련 뉴스 검색
             # """
-            #             elif msgSplit[0] == ".실검":
-            #                 res = service.realtime()
+            elif msgSplit[0] == ".실검":
+                res = service.realtime()
             #             elif msgSplit[0] == ".환율":
             #                 res = service.getExchangeRate()
             #             elif msgSplit[0] == ".비트":
@@ -221,13 +222,11 @@ NAME
             #                     res = service.getOut(name)
             #                 else:
             #                     res = "강퇴할 사람을 입력해주세요. \n사용법 : .강퇴 [닉네임]"
-            #             elif msgSplit[0] == ".섹스":
-            #                 res = service.getHentai()
 
             #             elif msgSplit[0] in [".멜론차트", ".멜론"]:
             #                 res = service.getMelonChart()
-            #             elif msgSplit[0] in [".영화", ".현재상영작", ".영화추천"]:
-            #                 res = service.getMovieList()
+            elif msgSplit[0] in [".영화", ".현재상영작", ".영화추천"]:
+                res = service.getMovieList()
             # else:
                 # res = (
                 #     "명령을 인식할 수 없습니다.\n.명령어로 명령어를 조회할 수 있습니다."
