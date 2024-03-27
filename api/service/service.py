@@ -7,6 +7,8 @@ from api import db
 from sqlalchemy.sql import func
 from playwright.sync_api import sync_playwright
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 
@@ -365,8 +367,15 @@ def getNewsSearch(keyword):
 
 def realtime():
     # Setup Selenium WebDriver
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Ensure GUI is off
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # Setup Selenium WebDriver
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
 
     # URL of the page to scrape
     url = "https://signal.bz/"
