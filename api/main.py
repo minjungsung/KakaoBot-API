@@ -96,6 +96,7 @@ NAME
 >>  .로또 [숫자]
 >>  .채팅순위 [오늘/일주일/한달]
 >>  .넌뭐야
+>>  .한강온도
 
 """
             elif msgSplit[0] == ".넌뭐야":
@@ -201,8 +202,8 @@ NAME
             #             elif msgSplit[0] in [".메뉴추천", ".점메추", ".저메추"]:
             #                 res = service.getMenu(sender)
 
-            #             elif msgSplit[0] in [".한강온도", ".한강물온도"]:
-            #                 res = service.getHanRiverTemp()
+            elif msgSplit[0] in [".한강온도", ".한강물온도"]:
+                res = service.getHanRiverTemp()
             #             elif msgSplit[0] == ".자살":
             #                 res = service.getSuicide(sender)
             #             elif msgSplit[0] in [
