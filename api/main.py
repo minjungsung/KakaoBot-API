@@ -202,7 +202,7 @@ NAME
             #             elif msgSplit[0] in [".메뉴추천", ".점메추", ".저메추"]:
             #                 res = service.getMenu(sender)
 
-            elif msgSplit[0] in [".한강온도", ".한강물온도"]:
+            elif msgSplit[0] == ".한강온도":
                 res = service.getHanRiverTemp()
             #             elif msgSplit[0] == ".자살":
             #                 res = service.getSuicide(sender)
