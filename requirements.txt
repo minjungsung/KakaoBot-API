@@ -5,7 +5,7 @@ DateTime==5.2
 Deprecated==1.2.14
 emoji==2.8.0
 Flask==2.3.3
-Flask-Migrate==4.0.5
+Flask-Migrate==4.1.0
 Flask-SQLAlchemy==3.0.5
 fonttools==4.43.0
 requests==2.32.4
