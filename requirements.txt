@@ -9,7 +9,7 @@ Flask-Migrate==4.1.0
 Flask-SQLAlchemy==3.1.1
 fonttools==4.65.0
 requests==2.34.2
-SQLAlchemy==2.0.54
+SQLAlchemy==2.1.0
 tiktoken==0.14.0
 playwright
 psycopg2-binary
